@@ -1,14 +1,27 @@
 ---
 - name: Ensure Apache is deployed
-  hosts: dev
+  hosts: prod 
   become: yes
   tasks:
   - name: alpha tag task
-    copy:
+    ansible.builtin.copy:
       content: "Hello"
       dest: /var/www/html/index.html
-  - mame: beta tag task
-    copy:
+      force: yes
+    tags: [never,alpha]
+    notify: restart
+  - name: beta tag task
+    ansible.builtin.copy:
       content: "By By"
       dest: /var/www/html/index.html
+      force: yes
+    tags: [never,beta]
+    notify: restart
+  handlers:
+   - name: restart
+     ansible.builtin.service:
+        name: httpd
+        state: restarted
+        enabled: yes
+
        
